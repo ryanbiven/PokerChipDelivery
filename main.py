@@ -1,16 +1,13 @@
-# This is a sample Python script.
+from djitellopy import Tello
 
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    tello = Tello()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    tello.connect()
+    tello.takeoff()
+
+    tello.move_left(100)
+    tello.rotate_counter_clockwise(90)
+    tello.move_forward(100)
+
+    tello.land()
