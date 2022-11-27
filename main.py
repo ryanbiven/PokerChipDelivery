@@ -27,7 +27,7 @@ import av
 import cv2
 from pynput import keyboard
 from tracker import Tracker
-from color import Color
+from trackingparams import TrackingParams
 
 def main():
     """ Create a tello controller and show the video feed."""
@@ -51,7 +51,7 @@ class TelloCV(object):
         self.tracking = False
         self.keydown = False
         self.date_fmt = '%Y-%m-%d_%H%M%S'
-        self.speed = 50
+        self.speed = TrackingParams.speed
         self.drone = tellopy.Tello()
         self.init_drone()
         self.init_controls()
@@ -67,7 +67,7 @@ class TelloCV(object):
         self.track_cmd = ""
         self.tracker = Tracker(self.vid_stream.height,
                                self.vid_stream.width,
-                               Color.lower, Color.upper)
+                               TrackingParams.color_lower, TrackingParams.color_upper)
 
     def init_drone(self):
         """Connect, uneable streaming and subscribe to events"""
@@ -156,7 +156,7 @@ class TelloCV(object):
         xoff, yoff = self.tracker.track(image)
         image = self.tracker.draw_arrows(image)
 
-        distance = 100
+        distance = TrackingParams.allowed_distance
         cmd = ""
         if self.tracking:
             if xoff < -distance:
@@ -198,7 +198,7 @@ class TelloCV(object):
             text = stat.lstrip()
             cv2.putText(frame, text, (0, 30 + (idx * 30)),
                         cv2.FONT_HERSHEY_SIMPLEX,
-                        1.0, (255, 0, 0), lineType=30)
+                        1.0, (0, 255, 0), lineType=30)
         return frame
 
     def toggle_recording(self, speed):

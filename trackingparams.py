@@ -1,6 +1,8 @@
-class Color(object):
-    lower = (5, 50, 50)
-    upper = (30, 255, 255)
+class TrackingParams(object):
+    color_lower = (100, 100, 100)
+    color_upper = (135, 255, 255)
+    allowed_distance = 100
+    speed = 50
 
     # tracking a color
     # green_lower = (30, 50, 50)

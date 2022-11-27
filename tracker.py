@@ -24,7 +24,7 @@ import time
 import cv2
 import imutils
 from imutils.video import VideoStream
-from color import Color
+from trackingparams import TrackingParams
 
 def main():
     """Handles input from file or stream, tests the tracker class"""
@@ -47,7 +47,7 @@ def main():
     stream = args.get("video", False)
     frame = get_frame(vid_stream, stream)
     height, width = frame.shape[0], frame.shape[1]
-    color_tracker = Tracker(height, width, Color.lower, Color.upper)
+    color_tracker = Tracker(height, width, TrackingParams.color_lower, TrackingParams.color_upper)
 
     # keep looping until no more frames
     more_frames = True
