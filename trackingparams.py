@@ -1,9 +1,12 @@
 class TrackingParams(object):
     color_lower = (100, 100, 100)
     color_upper = (135, 255, 255)
-    allowed_distance = 100
-    speed = 50
-    landing_radius = 100 # ?????
+    allowed_distance = 75
+    move_speed = 10
+    turn_speed = 20
+    landing_radius = 200
+    track_spin = 45
+    track_up = 10
 
     # tracking a color
     # green_lower = (30, 50, 50)

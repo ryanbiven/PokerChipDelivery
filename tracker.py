@@ -120,6 +120,8 @@ class Tracker:
     def track(self, frame, landing_radius):
         """Simple HSV color space tracking"""
         land = False
+        found = False
+        radius = None
 
         # resize the frame, blur it, and convert it to the HSV
         # color space
@@ -156,6 +158,8 @@ class Tracker:
 
             # only proceed if the radius meets a minimum size
             if radius > 10:
+                # drone recognizes that it sees the object
+                found = True
                 # draw the circle and centroid on the frame,
                 # then update the list of tracked points
                 cv2.circle(frame, (int(x), int(y)), int(radius),
@@ -171,7 +175,7 @@ class Tracker:
             self.xoffset = 0
             self.yoffset = 0
 
-        return self.xoffset, self.yoffset, land
+        return self.xoffset, self.yoffset, land, found, radius
 
 
 if __name__ == '__main__':

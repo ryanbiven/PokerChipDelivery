@@ -51,7 +51,9 @@ class TelloCV(object):
         self.tracking = False
         self.keydown = False
         self.date_fmt = '%Y-%m-%d_%H%M%S'
-        self.speed = TrackingParams.speed
+        self.speed = 20
+        self.turn_speed = TrackingParams.turn_speed
+        self.move_speed = TrackingParams.move_speed
         self.drone = tellopy.Tello()
         self.init_drone()
         self.init_controls()
@@ -64,7 +66,7 @@ class TelloCV(object):
         self.out_name = None
         self.start_time = time.time()
 
-        self.track_cmd = ""
+        self.last_cmd = ""
         self.tracker = Tracker(self.vid_stream.height,
                                self.vid_stream.width,
                                TrackingParams.color_lower, TrackingParams.color_upper)
@@ -153,17 +155,24 @@ class TelloCV(object):
         if self.record:
             self.record_vid(frame)
 
-        xoff, yoff, land = self.tracker.track(image, TrackingParams.landing_radius)
+        xoff, yoff, land, found, object_radius = self.tracker.track(image, TrackingParams.landing_radius)
 
-        if land:
-            self.drone.land(self)
+
 
         image = self.tracker.draw_arrows(image)
 
         distance = TrackingParams.allowed_distance
         cmd = ""
         if self.tracking:
-            if xoff < -distance:
+
+            if land:
+                cmd = "land"
+
+            elif not found:
+                cmd = "clockwise"
+                # self.drone.up(TrackingParams.track_up)
+
+            elif xoff < -distance:
                 cmd = "counter_clockwise"
             elif xoff > distance:
                 cmd = "clockwise"
@@ -172,19 +181,32 @@ class TelloCV(object):
             elif yoff > distance:
                 cmd = "up"
             else:
-                if self.track_cmd != "":
-                    # TODO: This might be where you make it go forward.
-                    #self.drone.forward(self, 50)
+                cmd = "forward"
+                # if self.last_cmd != "":
+                #
+                #     cmd = "forward"
+                #
+                #     getattr(self.drone, self.last_cmd)(0)
+                #     self.last_cmd = ""
+                #
 
-                    getattr(self.drone, self.track_cmd)(0)
-                    self.track_cmd = ""
-
-
-        if cmd != self.track_cmd:
+        if cmd != self.last_cmd:
             if cmd != "":
                 print("track command:", cmd)
-                getattr(self.drone, cmd)(self.speed)
-                self.track_cmd = cmd
+                if cmd == "land":
+                    getattr(self.drone, cmd)
+                    quit()
+                else:
+                    if cmd == "forward":
+                        #TODO: move_speed needs to be a function of radius: the closer you are the lower it is.
+                        # Use `object_radius`
+                        getattr(self.drone, cmd)(self.move_speed)
+                    else:
+                        #TODO: turn_speed needs to be a function of distance: the closer you are the lower it is.
+                        # Use `object_radius`
+                        getattr(self.drone, cmd)(self.turn_speed)
+
+                self.last_cmd = cmd
 
         return image
 
