@@ -117,8 +117,10 @@ class Tracker:
                         (0, 0, 255), 5)
         return frame
 
-    def track(self, frame):
+    def track(self, frame, landing_radius):
         """Simple HSV color space tracking"""
+        land = False
+
         # resize the frame, blur it, and convert it to the HSV
         # color space
         blurred = cv2.GaussianBlur(frame, (11, 11), 0)
@@ -143,10 +145,14 @@ class Tracker:
             # find the largest contour in the mask, then use
             # it to compute the minimum enclosing circle and
             # centroid
+
             c = max(cnts, key=cv2.contourArea)
             ((x, y), radius) = cv2.minEnclosingCircle(c)
             M = cv2.moments(c)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+
+            if radius > landing_radius:
+                land = True
 
             # only proceed if the radius meets a minimum size
             if radius > 10:
@@ -164,7 +170,8 @@ class Tracker:
         else:
             self.xoffset = 0
             self.yoffset = 0
-        return self.xoffset, self.yoffset
+
+        return self.xoffset, self.yoffset, land
 
 
 if __name__ == '__main__':

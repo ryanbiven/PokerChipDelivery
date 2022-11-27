@@ -153,7 +153,11 @@ class TelloCV(object):
         if self.record:
             self.record_vid(frame)
 
-        xoff, yoff = self.tracker.track(image)
+        xoff, yoff, land = self.tracker.track(image, TrackingParams.landing_radius)
+
+        if land:
+            self.drone.land(self)
+
         image = self.tracker.draw_arrows(image)
 
         distance = TrackingParams.allowed_distance
@@ -169,6 +173,9 @@ class TelloCV(object):
                 cmd = "up"
             else:
                 if self.track_cmd != "":
+                    # TODO: This might be where you make it go forward.
+                    #self.drone.forward(self, 50)
+
                     getattr(self.drone, self.track_cmd)(0)
                     self.track_cmd = ""
 
