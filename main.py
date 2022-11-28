@@ -57,7 +57,6 @@ class TelloCV(object):
         self.drone = tellopy.Tello()
         self.init_drone()
         self.init_controls()
-
         # container for processing the packets into frames
         self.container = av.open(self.drone.get_video_stream())
         self.vid_stream = self.container.streams.video[0]
@@ -164,49 +163,50 @@ class TelloCV(object):
         distance = TrackingParams.allowed_distance
         cmd = ""
         if self.tracking:
-
             if land:
-                cmd = "land"
-
+                self.drone.land()
             elif not found:
                 cmd = "clockwise"
+                # make the drone slowly rise into the air
                 # self.drone.up(TrackingParams.track_up)
-
-            elif xoff < -distance:
-                cmd = "counter_clockwise"
-            elif xoff > distance:
-                cmd = "clockwise"
             elif yoff < -distance:
                 cmd = "down"
             elif yoff > distance:
                 cmd = "up"
+            elif xoff < -distance:
+                cmd = "counter_clockwise"
+            elif xoff > distance:
+                cmd = "clockwise"
             else:
                 cmd = "forward"
-                # if self.last_cmd != "":
-                #
-                #     cmd = "forward"
-                #
-                #     getattr(self.drone, self.last_cmd)(0)
-                #     self.last_cmd = ""
-                #
-
         if cmd != self.last_cmd:
+            if self.last_cmd != "":
+                print(self.last_cmd)
+                getattr(self.drone, self.last_cmd)(0)
+            self.last_cmd = cmd
+
             if cmd != "":
                 print("track command:", cmd)
                 if cmd == "land":
                     getattr(self.drone, cmd)
-                    quit()
                 else:
                     if cmd == "forward":
-                        #TODO: move_speed needs to be a function of radius: the closer you are the lower it is.
-                        # Use `object_radius`
-                        getattr(self.drone, cmd)(self.move_speed)
+                        # drone will move forward at speed set in tracking params
+                        getattr(self.drone, cmd)(TrackingParams.move_speed)
                     else:
-                        #TODO: turn_speed needs to be a function of distance: the closer you are the lower it is.
-                        # Use `object_radius`
-                        getattr(self.drone, cmd)(self.turn_speed)
+                        # drone SHOULD stop moving forward
+                        getattr(self.drone, "forward")(0)
+                        if not found:
+                            tempturn_speed = 50
+                        else:
+                            if object_radius > 150:
+                                tempturn_speed = 10
+                            else:
+                                tempturn_speed = 20
 
-                self.last_cmd = cmd
+                                print("***** tempturn_speed = %s" % tempturn_speed)
+                                getattr(self.drone, cmd)(tempturn_speed)
+
 
         return image
 
