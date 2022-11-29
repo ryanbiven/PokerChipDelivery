@@ -199,6 +199,7 @@ class TelloCV(object):
                         if not found:
                             tempturn_speed = 50
                         else:
+                            # TODO line 203-206 is untested code
                             if object_radius > 150:
                                 tempturn_speed = 10
                             else:
